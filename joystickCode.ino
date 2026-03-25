@@ -320,3 +320,36 @@ else{
   delay(10);
 }
 }
+
+
+
+
+if movement = forward{
+
+  thruster1_forward = on
+  thruster2_forward = on
+  thruster3_forward = on
+
+}
+if movement = left{
+
+  pin1 = forward_thruster_starboard
+  pin2 = forward_thruster_port
+  pin3 = forward_thruster_mid
+  pin4 = forward_thruster_vertical
+  pin5 = reverse_thruster_starboard
+  pin6 = reverse_thruster_port
+  pin7 = reverse_thruster_mid
+  pin8 = reverse_thruster_vertical
+
+
+}
+
+struct thruster{
+  forward = {forward_thruster_starboard, forward_thruster_port, forward_thruster_mid};
+  reverse = {pin5, pin6, pin7, pin8};
+  left_upper_corner = {forward_thruster_port, forward_thruster_mid, reverse_thruster_starboard};
+  right_upper_corner = {pin13, pin14, pin15, pin16};
+  left_lower_corner = {pin17, pin18, pin19, pin20};
+  right_lower_corner = {pin21, pin22, pin23, pin24};
+}
