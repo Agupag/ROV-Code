@@ -2,6 +2,8 @@
 #define ANALOG_Y_PIN A0 
 #define ANALOG_BUTTON_PIN 2 
 
+#define testPin 10 
+
 #define ANALOG_X2_PIN A2
 #define ANALOG_Y2_PIN A3
 	 
@@ -10,6 +12,8 @@
 #define ANALOG_Y_CORRECTION 128 
 #define ANALOG_X2_CORRECTION 128
 #define ANALOG_Y2_CORRECTION 128
+
+
 	 
 struct button { 
 	 byte pressed = 0; 
@@ -24,6 +28,10 @@ void setup()
 { 
 	 pinMode(ANALOG_BUTTON_PIN, INPUT_PULLUP); 
 	 Serial.begin(115200); 
+   pinMode(testPin, OUTPUT);
+   pinMode(11, OUTPUT);
+   pinMode(12, OUTPUT);
+   pinMode(13, OUTPUT);
 } 
 	 
 void loop() 
@@ -39,12 +47,13 @@ void loop()
 	 analog2.y = readAnalogAxisLevel(ANALOG_Y2_PIN) - ANALOG_Y2_CORRECTION; 
 	 analog2.button.pressed = 0;   // no second button assigned
 	 
-	 drawDualAsciiController(
-	   analog1.x, analog1.y, analog1.button.pressed,
-	   analog2.x, analog2.y, analog2.button.pressed
-	 );
-
-	 delay(200); 
+	//  drawDualAsciiController(
+	//    analog1.x, analog1.y, analog1.button.pressed,
+	//    analog2.x, analog2.y, analog2.button.pressed
+	//  );
+   
+  interpretation(analog1.x, analog1.y, analog1.button.pressed, analog2.x, analog2.y, analog2.button.pressed);
+	 delay(100); 
 } 
 	 
 byte readAnalogAxisLevel(int pin) 
@@ -65,10 +74,37 @@ void interpretation(short x1, short y1, byte pressed1, short x2, short y2, byte 
   //these are the values that determine each section of the joystick. The joystick is mapped in x and y values, ranging from -128 to 128. 0 is the center.
   //In order to figure out what section the joystick is currently in, we need to set limits for each section, then apply them through if statements to find where the joystick is.
   
-  #define forwardYUpLimit 128
-  #define forwardXRightLimit 64
-  #define forwardXLeftLimit -64
-  #define forwardYDownLimit 120
+
+  // //forward
+  #define forwardYPosLimit 32
+  #define forwardYNegLimit -16
+  #define forwardXPosLimit 129
+  #define forwardXNegLimit 5
+
+
+
+  //   //left
+  #define leftYPosLimit 129
+  #define leftXPosLimit 36
+  #define leftXNegLimit -28
+  #define leftYNegLimit 5
+
+  //     //right
+  #define rightYPosLimit -5
+  #define rightYNegLimit -129
+  #define rightXPosLimit 58
+  #define rightXNegLimit -16
+
+
+  //   // //down
+  #define downYPosLimit 80
+  #define downYNegLimit -3
+  #define downXPosLimit -5
+  #define downXNegLimit -129
+
+
+
+
   String movement = "neutral";
 /*
 
@@ -102,14 +138,26 @@ void interpretation(short x1, short y1, byte pressed1, short x2, short y2, byte 
 // NOW WE NEED TO USE IF STATEMENTS TO FIND OUT WHICH SECTION IT IS IN
 
 //forward movement check from earlier
-if (y1 > forwardYDownLimit && y1 < forwardYUpLimit && x1 < forwardXRightLimit && x1 > forwardXLeftLimit){
+if (y1 > forwardYNegLimit && y1 < forwardYPosLimit && x1 < forwardXPosLimit && x1 > forwardXNegLimit){
   movement = "forward";
 }
-
-
+else if(y1 > leftYNegLimit && y1 < leftYPosLimit && x1 < leftXPosLimit && x1 > leftXNegLimit){
+  movement = "left";
+}
+else if(y1 > rightYNegLimit && y1 < rightYPosLimit && x1 < rightXPosLimit && x1 > rightXNegLimit){
+  movement = "right";
+}
+else if(y1 > downYNegLimit && y1 < downYPosLimit && x1 < downXPosLimit && x1 > downXNegLimit){
+  movement = "down";
+}
+Serial.print("y1:");
+Serial.println(y1);
+Serial.print("x1:");
+Serial.println(x1);
+Serial.println(" ");
 
 //placeholder movement if statements
-
+/*
 if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
   movement = "reverse";
 }
@@ -141,18 +189,36 @@ if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > __
 if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
   movement = "diagonalBackRight";
 }
-
-}
-
+*/
 
 
 
 // ==========. THEN WE OUTPUT THE MOVEMENT TO THE PINS. HERE IS EXAMPLE CODE    ===========
 
 if (movement == "forward"){
-  //pinout code for all 3 thrusters on
+  digitalWrite(testPin, HIGH);
+  delay(50);
 }
-
+else if (movement == "right"){
+  digitalWrite(11, HIGH);
+  delay(50);
+}
+else if (movement == "left"){
+  digitalWrite(12, HIGH);
+  delay(50);
+}
+else if (movement == "down"){
+  digitalWrite(13, HIGH);
+  delay(50);
+}
+else{
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  delay(50);
+}
+}
 ////////////////////////////////////////////////////////////////
 
 
