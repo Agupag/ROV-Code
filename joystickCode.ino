@@ -2,7 +2,6 @@
 #define ANALOG_Y_PIN A0 
 #define ANALOG_BUTTON_PIN 2 
 
-#define testPin 10 
 
 #define ANALOG_X2_PIN A2
 #define ANALOG_Y2_PIN A3
@@ -13,6 +12,11 @@
 #define ANALOG_X2_CORRECTION 128
 #define ANALOG_Y2_CORRECTION 128
 
+#define testPin 10 
+#define pinCornerLeft 5
+#define pinCornerBottomLeft 4
+#define pinCornerBottomRight 7
+#define pinCornerRight 6
 
 	 
 struct button { 
@@ -32,6 +36,10 @@ void setup()
    pinMode(11, OUTPUT);
    pinMode(12, OUTPUT);
    pinMode(13, OUTPUT);
+   pinMode(pinCornerRight, OUTPUT);
+   pinMode(pinCornerLeft, OUTPUT);
+   pinMode(pinCornerBottomRight, OUTPUT);
+   pinMode(pinCornerBottomLeft, OUTPUT);
 } 
 	 
 void loop() 
@@ -53,7 +61,7 @@ void loop()
 	//  );
    
   interpretation(analog1.x, analog1.y, analog1.button.pressed, analog2.x, analog2.y, analog2.button.pressed);
-	 delay(100); 
+	 delay(10); 
 } 
 	 
 byte readAnalogAxisLevel(int pin) 
@@ -137,24 +145,41 @@ void interpretation(short x1, short y1, byte pressed1, short x2, short y2, byte 
 
 // NOW WE NEED TO USE IF STATEMENTS TO FIND OUT WHICH SECTION IT IS IN
 
-//forward movement check from earlier
-if (y1 > forwardYNegLimit && y1 < forwardYPosLimit && x1 < forwardXPosLimit && x1 > forwardXNegLimit){
+// Prioritize corners first, then directions, so only one movement is set
+if (x1 > 10 && y1 < -10) {
+  movement = "cornerRight";
+}
+else if (x1 < -10 && y1 < -10) {
+  movement = "cornerLeft";
+}
+else if (x1 < -10 && y1 > 10) {
+  movement = "cornerBottomLeft";
+}
+else if (x1 > 10 && y1 > 10) {
+  movement = "cornerBottomRight";
+}
+else if (y1 > forwardYNegLimit && y1 < forwardYPosLimit && x1 < forwardXPosLimit && x1 > forwardXNegLimit) {
   movement = "forward";
 }
-else if(y1 > leftYNegLimit && y1 < leftYPosLimit && x1 < leftXPosLimit && x1 > leftXNegLimit){
+else if (y1 > leftYNegLimit && y1 < leftYPosLimit && x1 < leftXPosLimit && x1 > leftXNegLimit) {
   movement = "left";
 }
-else if(y1 > rightYNegLimit && y1 < rightYPosLimit && x1 < rightXPosLimit && x1 > rightXNegLimit){
+else if (y1 > rightYNegLimit && y1 < rightYPosLimit && x1 < rightXPosLimit && x1 > rightXNegLimit) {
   movement = "right";
 }
-else if(y1 > downYNegLimit && y1 < downYPosLimit && x1 < downXPosLimit && x1 > downXNegLimit){
+else if (y1 > downYNegLimit && y1 < downYPosLimit && x1 < downXPosLimit && x1 > downXNegLimit) {
   movement = "down";
 }
+Serial.println(movement);
+Serial.println(" ");
 Serial.print("y1:");
 Serial.println(y1);
 Serial.print("x1:");
 Serial.println(x1);
 Serial.println(" ");
+
+
+
 
 //placeholder movement if statements
 /*
@@ -197,99 +222,101 @@ if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > __
 
 if (movement == "forward"){
   digitalWrite(testPin, HIGH);
-  delay(50);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
 }
-else if (movement == "right"){
+else if(movement == "right"){
   digitalWrite(11, HIGH);
-  delay(50);
+  digitalWrite(testPin, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
 }
-else if (movement == "left"){
+else if(movement == "left"){
   digitalWrite(12, HIGH);
-  delay(50);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
 }
-else if (movement == "down"){
+else if(movement == "down"){
   digitalWrite(13, HIGH);
-  delay(50);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
+}
+else if(movement == "cornerRight"){
+  digitalWrite(pinCornerRight, HIGH);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
+}
+else if(movement == "cornerLeft"){
+  digitalWrite(pinCornerLeft, HIGH);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
+}
+else if(movement == "cornerBottomLeft"){
+  digitalWrite(pinCornerBottomLeft, HIGH);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
+}
+else if(movement == "cornerBottomRight"){
+  digitalWrite(pinCornerBottomRight, HIGH);
+  digitalWrite(testPin, LOW);
+  digitalWrite(11, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  delay(10);
 }
 else{
   digitalWrite(testPin, LOW);
   digitalWrite(11, LOW);
   digitalWrite(12, LOW);
   digitalWrite(13, LOW);
-  delay(50);
+  digitalWrite(pinCornerRight, LOW);
+  digitalWrite(pinCornerLeft, LOW);
+  digitalWrite(pinCornerBottomLeft, LOW);
+  digitalWrite(pinCornerBottomRight, LOW);
+  delay(10);
 }
-}
-////////////////////////////////////////////////////////////////
-
-
-
-//BELOW THIS IS VIBECODED UNUSED CODE ==============================================================================================================
-
-
-void drawDualAsciiController(short x1, short y1, byte pressed1, short x2, short y2, byte pressed2)
-{
-  const int W = 21;
-  const int H = 11;
-
-  int px1 = map(x1, -128, 128, 0, W - 1);
-  int py1 = map(y1, 128, -128, 0, H - 1);
-
-  int px2 = map(x2, -128, 128, 0, W - 1);
-  int py2 = map(y2, 128, -128, 0, H - 1);
-
-  Serial.println();
-  Serial.println(F("      JOYSTICK 1                     JOYSTICK 2"));
-  Serial.println(F("         Y+                            Y+"));
-  Serial.println(F("          ^                             ^"));
-
-  for (int row = 0; row < H; row++) {
-    Serial.print(F("     |"));
-    for (int col = 0; col < W; col++) {
-      if (col == px1 && row == py1) {
-        Serial.print('O');
-      } else if (col == W / 2 && row == H / 2) {
-        Serial.print('+');
-      } else if (col == W / 2) {
-        Serial.print('|');
-      } else if (row == H / 2) {
-        Serial.print('-');
-      } else {
-        Serial.print(' ');
-      }
-    }
-
-    Serial.print(F("|     "));
-
-    Serial.print(F("|"));
-    for (int col = 0; col < W; col++) {
-      if (col == px2 && row == py2) {
-        Serial.print('O');
-      } else if (col == W / 2 && row == H / 2) {
-        Serial.print('+');
-      } else if (col == W / 2) {
-        Serial.print('|');
-      } else if (row == H / 2) {
-        Serial.print('-');
-      } else {
-        Serial.print(' ');
-      }
-    }
-    Serial.println(F("|"));
-  }
-
-  Serial.println(F("          +-------> X+                  +-------> X+"));
-
-  Serial.print(F("J1 X = "));
-  Serial.print(x1);
-  Serial.print(F("   Y = "));
-  Serial.print(y1);
-  Serial.print(F("   BTN = "));
-  Serial.print(pressed1 ? "PRESSED" : "NOT PRESSED");
-
-  Serial.print(F("      J2 X = "));
-  Serial.print(x2);
-  Serial.print(F("   Y = "));
-  Serial.print(y2);
-  Serial.print(F("   BTN = "));
-  Serial.println(pressed2 ? "PRESSED" : "NOT PRESSED");
 }
