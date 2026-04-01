@@ -1,35 +1,51 @@
 # Project Guidelines
 
 ## Scope
-- This workspace is a single-sketch Arduino project for joystick input and movement interpretation.
-- Primary source file: `joystickCode.ino`.
-- Existing user-facing project docs are in `README.md`; link there instead of repeating setup details.
+- This workspace includes two Arduino sketches and one host-side Python bridge.
+- Primary files:
+  - `joystickCode.ino` for joystick movement interpretation and movement token output.
+  - `engr100 code.ino` for RF24 payload communication and control packet generation.
+  - `bridge/arduino_virtual_pin_bridge.py` for serial-to-UDP mirroring.
+- Keep user-facing setup/usage details in `README.md`; link there instead of duplicating.
 
 ## Build And Validation
-- Prefer compile-only validation unless the user explicitly asks to upload.
-- If a board is not specified, ask before compiling with a fixed FQBN.
-- Typical compile flow uses Arduino CLI, for example:
+- Prefer compile-only checks unless upload is explicitly requested.
+- If board/FQBN is not specified, ask before compiling.
+- Arduino compile example:
   - `arduino-cli compile --fqbn <board-fqbn> joystickCode.ino`
-- Upload requires an explicit port and user approval, for example:
+- Arduino upload example (requires explicit port and approval):
   - `arduino-cli upload -p <serial-port> --fqbn <board-fqbn> joystickCode.ino`
-- Runtime verification is via Serial Monitor at `115200` baud.
+- Bridge install/run/test:
+  - `python3 -m pip install -r bridge/requirements.txt`
+  - `python3 bridge/arduino_virtual_pin_bridge.py`
+  - `python3 -m unittest discover -s bridge/tests`
+- Runtime serial verification uses `115200` baud.
 
 ## Architecture
-- `loop()` reads two analog sticks, normalizes axis values around center, and calls `interpretation(...)`.
-- `interpretation(...)` maps joystick regions to movement states (corners first, then cardinal directions) and sets output pins.
-- Movement behavior is currently threshold-box based, not angle/vector based.
+- `joystickCode.ino`:
+  - `loop()` reads joystick axes, normalizes to roughly `-128..128`, then calls `interpretation(...)`.
+  - `interpretation(...)` uses threshold boxes with corner-first priority, then cardinal directions.
+- `engr100 code.ino`:
+  - Handles RF24 packet exchange and maps control inputs to `c_data.m1..m4` values (`0/1/2`).
+  - May use manual pin semantics or virtual control-state semantics depending on task.
+- `bridge/arduino_virtual_pin_bridge.py`:
+  - Parses serial movement frames and emits UDP JSON packets to localhost.
 
 ## Conventions
-- Keep pin assignments and joystick correction values as top-level constants.
-- Preserve the current movement-priority order unless the task explicitly changes behavior.
-- Keep output writes explicit and deterministic (set intended HIGH pin, set all others LOW).
-- Keep serial debug output readable and grouped when adjusting movement logic.
+- Keep pin assignments and joystick correction constants at top-level.
+- Preserve movement priority order (corners before cardinals) unless a task explicitly asks to change it.
+- Keep output state updates deterministic and explicit each cycle.
+- Keep serial output contract stable when bridge parsing depends on it (`movement`, `x1`, `y1`).
+- Avoid introducing `String` churn in tight loops unless required for existing compatibility.
 
 ## Known Pitfalls
-- `README.md` contains useful setup context but may not always reflect latest loop timing/details.
-- `interpretation(...)` is actively evolving; some comments describe intended behavior not fully implemented yet.
-- Avoid large refactors that alter pin mappings or movement thresholds unless requested.
+- `joystickCode.ino` may include partial/experimental sections; keep movement parsing outputs consistent.
+- `engr100 code.ino` pin definitions and joystick pin usage can overlap; verify intent before changing pin behavior.
+- Avoid large refactors to pin mappings, threshold boxes, or motor mapping tables unless explicitly requested.
+- Bridge parser is strict about movement token validity and numeric axis lines; malformed frame changes can break UDP output.
 
 ## Link-First References
 - Project setup and usage: `README.md`
-- Movement and pin logic implementation: `joystickCode.ino`
+- Joystick movement logic: `joystickCode.ino`
+- RF24 control pipeline: `engr100 code.ino`
+- Bridge and payload contract: `bridge/arduino_virtual_pin_bridge.py`, `bridge/tests/test_arduino_virtual_pin_bridge.py`

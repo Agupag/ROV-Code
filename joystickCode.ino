@@ -100,11 +100,6 @@ void loop()
 	 analog2.y = readAnalogAxisLevel(ANALOG_Y2_PIN) - ANALOG_Y2_CORRECTION; 
 	 analog2.button.pressed = 0;   // no second button assigned
 	 
-	//  drawDualAsciiController(
-	//    analog1.x, analog1.y, analog1.button.pressed,
-	//    analog2.x, analog2.y, analog2.button.pressed
-	//  );
-   
   interpretation(analog1.x, analog1.y, analog1.button.pressed, analog2.x, analog2.y, analog2.button.pressed);
 	 delay(10); 
 } 
@@ -222,43 +217,6 @@ Serial.println(y1);
 Serial.print("x1:");
 Serial.println(x1);
 Serial.println(" ");
-
-
-
-
-//placeholder movement if statements
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "reverse";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "diagonalLeft";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "diagonalRight";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "Right";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "Left";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "_____";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "diagonalBackLeft";
-// }
-
-// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-//   movement = "diagonalBackRight";
-// }
 
 
 
@@ -401,4 +359,46 @@ void activateThruster(Movement direction) {
   for (int i = 0; i < config.pinCount; i++) {
     digitalWrite(config.pins[i], HIGH);
   }
-}
+
+
+
+  // constants won't change. They're used here to set pin numbers:
+const int buttonUpPin = 2;     // pushbutton for UP
+const int buttonDownPin = 3;   // pushbutton for DOWN
+
+const int ledUpPin = 12;       //LED for UP
+const int ledDownPin = 13;     // LED for DOWN
+
+// variables will change:
+int buttonUpState = 0;     
+int buttonDownState = 0;   
+
+// void setup() {
+//   // initialize the LED pins as outputs:
+//   pinMode(ledUpPin, OUTPUT);
+//   pinMode(ledDownPin, OUTPUT);
+
+//   // initialize the pushbutton pins as inputs:
+//   pinMode(buttonUpPin, INPUT);
+//   pinMode(buttonDownPin, INPUT);
+// }
+
+// void loop() {
+//   // read the state of each pushbutton:
+//   buttonUpState = digitalRead(buttonUpPin);
+//   buttonDownState = digitalRead(buttonDownPin);
+
+//   // control UP LED
+//   if (buttonUpState == HIGH) {
+//     digitalWrite(ledUpPin, HIGH);
+//   } else {
+//     digitalWrite(ledUpPin, LOW);
+//   }
+
+//   // control DOWN LED
+//   if (buttonDownState == HIGH) {
+//     digitalWrite(ledDownPin, HIGH);
+//   } else {
+//     digitalWrite(ledDownPin, LOW);
+//   }
+// }

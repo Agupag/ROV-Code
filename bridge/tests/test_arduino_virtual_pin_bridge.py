@@ -78,13 +78,13 @@ class SerialOutputParserTests(unittest.TestCase):
                 "spin",
                 "x1:50",
                 "y1:10",
-                "down",
+                "reverse",
                 "y1:24",
                 "x1:-30",
             ]
         )
 
-        self.assertEqual(frames, [ParsedFrame(movement="down", x1=-30, y1=24)])
+        self.assertEqual(frames, [ParsedFrame(movement="reverse", x1=-30, y1=24)])
 
 
 class PayloadTests(unittest.TestCase):
@@ -100,6 +100,17 @@ class PayloadTests(unittest.TestCase):
                 for pin in pins:
                     self.assertEqual(payload["pins"][pin], 1)
                 self.assertEqual(sum(payload["pins"].values()), len(pins))
+
+    def test_reverse_movement_is_supported(self) -> None:
+        payload = build_live_payload(
+            ParsedFrame(movement="reverse", x1=0, y1=0),
+            sequence=1,
+            timestamp_ms=123,
+        )
+
+        self.assertEqual(payload["pins"]["10"], 1)
+        self.assertEqual(payload["pins"]["11"], 1)
+        self.assertEqual(payload["pins"]["12"], 1)
 
     def test_neutral_mapping_keeps_all_pins_low(self) -> None:
         pins, active_pin = build_pin_state("neutral")

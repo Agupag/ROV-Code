@@ -15,16 +15,15 @@ PIN_NUMBERS = ("4", "5", "6", "7", "10", "11", "12", "13")
 # Match joystickCode.ino: each movement can activate multiple virtual outputs.
 # Forward thrusters: 4,5,6
 # Reverse thrusters: 10,11,12
-# Vertical pair: 7/13
 MOVEMENT_TO_PINS = {
     "forward": ("4", "5", "6"),
-    "right": ("4", "6", "11"),
-    "left": ("5", "6", "10"),
-    "down": ("7", "13"),
-    "cornerRight": ("7", "13"),
-    "cornerLeft": ("5", "6", "10"),
-    "cornerBottomLeft": ("5", "6", "10"),
-    "cornerBottomRight": ("4", "6", "11"),
+    "reverse": ("12", "10", "11"),
+    "left": ("12", "11", "4"),
+    "right": ("12", "5", "10"),
+    "cornerLeft": ("4", "6"),
+    "cornerRight": ("5", "6"),
+    "cornerBottomLeft": ("10", "12"),
+    "cornerBottomRight": ("11", "12"),
 }
 ALLOWED_MOVEMENTS = frozenset((*MOVEMENT_TO_PINS.keys(), "neutral"))
 PREFERRED_PORT_TOKENS = (
