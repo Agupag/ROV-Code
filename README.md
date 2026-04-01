@@ -1,57 +1,104 @@
-# ROV Joystick Reader (Arduino)
+# ROV Joystick Bridge
 
-A simple Arduino sketch that reads **two analog joysticks** and prints their positions to the Serial Monitor.
+This repo contains the Arduino joystick sketch plus a host-side Python bridge that mirrors the sketch's resolved movement into UDP packets for a local PyBullet ROV simulation.
 
-It is useful for:
-- testing joystick wiring
-- visualizing stick movement in text
-- building toward ROV movement controls
+## Arduino sketch
 
-## What this code does
+[`joystickCode.ino`](/Users/connor/Desktop/ROV%20Code/joystickCode.ino) reads two analog joysticks, converts joystick 1 into a movement token, and drives one-hot digital outputs on these pins:
 
-The sketch:
-1. reads X/Y from joystick 1 and joystick 2
-2. recenters values around `0` (roughly `-128` to `128`)
-3. reads joystick 1 button press
-4. prints a side-by-side ASCII joystick display in Serial Monitor
+- `10` -> `forward`
+- `11` -> `right`
+- `12` -> `left`
+- `13` -> `down`
+- `6` -> `cornerRight`
+- `5` -> `cornerLeft`
+- `4` -> `cornerBottomLeft`
+- `7` -> `cornerBottomRight`
 
-## Pin setup
+The host bridge does not modify the sketch. It watches the sketch's existing serial output and recreates those pin states locally.
 
-| Function | Arduino Pin |
-|---|---|
-| Joystick 1 X | `A1` |
-| Joystick 1 Y | `A0` |
-| Joystick 1 Button | `D2` (`INPUT_PULLUP`) |
-| Joystick 2 X | `A2` |
-| Joystick 2 Y | `A3` |
+Note: the checked-in [`joystickCode.ino`](/Users/connor/Desktop/ROV%20Code/joystickCode.ino) currently has an unfinished `thruster` block at the end, so the bridge assumes the Arduino is already running a compatible sketch variant that prints the same `movement`, `y1`, and `x1` lines over serial.
 
-## Output format
+## Host bridge
 
-Every loop, Serial output shows:
-- a visual grid for **Joystick 1** and **Joystick 2**
-- current numeric X/Y values for each joystick
-- button state for joystick 1 (`PRESSED` or `NOT PRESSED`)
+Install the Python dependency:
 
-## Movement logic status
+```bash
+python3 -m pip install -r bridge/requirements.txt
+```
 
-The file also includes an `interpretation(...)` function that is **work in progress**.
+Run the bridge:
 
-- `forward` is partially defined with limits
-- other directions are placeholders
-- thruster output logic is commented as next step
+```bash
+python3 bridge/arduino_virtual_pin_bridge.py
+```
 
-So right now, the reliable part is the joystick reading + serial visualization.
+Or specify the port explicitly:
 
-## How to run
+```bash
+python3 bridge/arduino_virtual_pin_bridge.py --serial-port /dev/cu.usbmodemXXXX
+```
 
-1. Open `joystickCode.ino` in Arduino IDE.
-2. Select your board and COM/serial port.
-3. Upload the sketch.
-4. Open Serial Monitor at **115200 baud**.
-5. Move both joysticks and watch the ASCII display update.
+Supported flags:
 
-## Quick notes
+- `--serial-port`
+- `--baud` default `115200`
+- `--udp-host` default `127.0.0.1`
+- `--udp-port` default `8765`
+- `--stale-timeout-ms` default `250`
 
-- Values are mapped from Arduino ADC (`0-1023`) to (`0-255`), then corrected to center around zero.
-- Loop delay is `200 ms`, so output updates about 5 times per second.
-- Joystick button uses pull-up logic, so pressed reads as LOW.
+If `--serial-port` is omitted, the bridge auto-detects a likely Arduino port by preferring `/dev/cu.*` devices whose names contain `usbmodem`, `usbserial`, `wchusbserial`, `ttyACM`, or `ttyUSB`. If no match is found, it prints a clear list of discovered ports and keeps retrying until a matching device appears.
+
+## UDP payload contract
+
+The bridge sends one localhost UDP JSON datagram per valid serial frame to `127.0.0.1:8765`.
+
+```json
+{
+  "source": "arduino_virtual_pin_bridge",
+  "sequence": 42,
+  "timestamp_ms": 1775000000000,
+  "is_live": true,
+  "movement": "forward",
+  "axes": { "x1": 18, "y1": -27 },
+  "pins": { "4": 0, "5": 0, "6": 0, "7": 0, "10": 1, "11": 0, "12": 0, "13": 0 },
+  "active_pin": 10
+}
+```
+
+Fail-safe behavior:
+
+- If no valid frame arrives for more than `250 ms`, the bridge sends one neutral packet with `is_live: false`.
+- If the serial link disconnects, the bridge sends the same neutral packet once and keeps retrying until the Arduino reappears.
+
+Neutral fail-safe packet shape:
+
+```json
+{
+  "source": "arduino_virtual_pin_bridge",
+  "sequence": 43,
+  "timestamp_ms": 1775000000250,
+  "is_live": false,
+  "movement": "neutral",
+  "axes": { "x1": null, "y1": null },
+  "pins": { "4": 0, "5": 0, "6": 0, "7": 0, "10": 0, "11": 0, "12": 0, "13": 0 },
+  "active_pin": null
+}
+```
+
+## Testing
+
+Run the unit tests:
+
+```bash
+python3 -m unittest discover -s bridge/tests
+```
+
+The tests cover:
+
+- serial frame parsing with blank lines
+- `x1` / `y1` parsing in either order
+- partial and malformed frames
+- unknown movement tokens
+- one-hot virtual pin mapping
+- neutral fail-safe payload generation

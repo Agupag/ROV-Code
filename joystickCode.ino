@@ -12,13 +12,22 @@
 #define ANALOG_X2_CORRECTION 128
 #define ANALOG_Y2_CORRECTION 128
 
-#define testPin 10 
-#define pinCornerLeft 5
-#define pinCornerBottomLeft 4
-#define pinCornerBottomRight 7
-#define pinCornerRight 6
+// #define testPin 10 
+// #define pinCornerLeft 5
+// #define pinCornerBottomLeft 4
+// #define pinCornerBottomRight 7
+// #define pinCornerRight 6
 
 	 
+#define forward_thruster_starboard 4
+#define forward_thruster_port 5
+#define forward_thruster_mid 6
+#define forward_thruster_vertical 7
+#define reverse_thruster_starboard 10
+#define reverse_thruster_port 11
+#define reverse_thruster_mid 12
+#define reverse_thruster_vertical 13
+
 struct button { 
 	 byte pressed = 0; 
 }; 
@@ -28,18 +37,54 @@ struct analog {
 	 button button; 
 }; 
 	 
+struct ThrusterConfig {
+  const byte *pins;
+  byte pinCount;
+};
+
+const byte forwardThrusters[] = {forward_thruster_starboard, forward_thruster_port, forward_thruster_mid};
+const byte reverseThrusters[] = {reverse_thruster_mid, reverse_thruster_starboard, reverse_thruster_port};
+const byte leftUpperThrusters[] = {forward_thruster_starboard, forward_thruster_mid};
+const byte rightUpperThrusters[] = {forward_thruster_port, forward_thruster_mid};
+const byte leftLowerThrusters[] = {reverse_thruster_starboard, reverse_thruster_mid};
+const byte rightLowerThrusters[] = {reverse_thruster_port, reverse_thruster_mid};
+const byte leftThrusters[] = {reverse_thruster_mid, reverse_thruster_port, forward_thruster_starboard};
+const byte rightThrusters[] = {reverse_thruster_mid, forward_thruster_port, reverse_thruster_starboard};
+
+
+//const byte leftUpperThrusters[] = {forward_thruster_port, forward_thruster_mid, reverse_thruster_starboard};
+//const byte rightUpperThrusters[] = {forward_thruster_starboard, forward_thruster_mid, reverse_thruster_port};
+//const byte leftLowerThrusters[] = {forward_thruster_port, forward_thruster_mid, reverse_thruster_starboard};
+//const byte rightLowerThrusters[] = {forward_thruster_starboard, forward_thruster_mid, reverse_thruster_port};
+
+const byte downThrusters[] = {forward_thruster_vertical};
+const byte upThrusters[] = {reverse_thruster_vertical};
+
+ThrusterConfig thrusters[8] = {
+  {forwardThrusters, 3},        // FORWARD
+  {reverseThrusters, 3},        // BACKWARD
+  {leftUpperThrusters, 2},      // LEFT_UPPER
+  {rightUpperThrusters, 2},     // RIGHT_UPPER
+  {leftLowerThrusters, 2},      // LEFT_LOWER
+  {rightLowerThrusters, 2},     // RIGHT_LOWER
+  {leftThrusters, 3},           // LEFT
+  {rightThrusters, 3}           // RIGHT
+};
+
+enum Movement { FORWARD, BACKWARD, LEFT_UPPER, RIGHT_UPPER, LEFT_LOWER, RIGHT_LOWER, LEFT, RIGHT };
+
 void setup() 
-{ 
+{
 	 pinMode(ANALOG_BUTTON_PIN, INPUT_PULLUP); 
 	 Serial.begin(115200); 
-   pinMode(testPin, OUTPUT);
-   pinMode(11, OUTPUT);
-   pinMode(12, OUTPUT);
-   pinMode(13, OUTPUT);
-   pinMode(pinCornerRight, OUTPUT);
-   pinMode(pinCornerLeft, OUTPUT);
-   pinMode(pinCornerBottomRight, OUTPUT);
-   pinMode(pinCornerBottomLeft, OUTPUT);
+  pinMode(forward_thruster_port, OUTPUT);
+  pinMode(forward_thruster_starboard, OUTPUT);
+  pinMode(forward_thruster_mid, OUTPUT);
+  pinMode(forward_thruster_vertical, OUTPUT);
+  pinMode(reverse_thruster_port, OUTPUT);
+  pinMode(reverse_thruster_starboard, OUTPUT);
+  pinMode(reverse_thruster_mid, OUTPUT);
+  pinMode(reverse_thruster_vertical, OUTPUT);
 } 
 	 
 void loop() 
@@ -168,7 +213,7 @@ else if (y1 > rightYNegLimit && y1 < rightYPosLimit && x1 < rightXPosLimit && x1
   movement = "right";
 }
 else if (y1 > downYNegLimit && y1 < downYPosLimit && x1 < downXPosLimit && x1 > downXNegLimit) {
-  movement = "down";
+  movement = "reverse";
 }
 Serial.println(movement);
 Serial.println(" ");
@@ -182,174 +227,178 @@ Serial.println(" ");
 
 
 //placeholder movement if statements
-/*
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "reverse";
-}
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "diagonalLeft";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "reverse";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "diagonalRight";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "diagonalLeft";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "Right";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "diagonalRight";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "Left";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "Right";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "_____";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "Left";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "diagonalBackLeft";
-}
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "_____";
+// }
 
-if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
-  movement = "diagonalBackRight";
-}
-*/
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "diagonalBackLeft";
+// }
+
+// if (y1 > ____YDownLimit && y1 < _____YUpLimit && x1 < ____XRightLimit && x1 > _____XLeftLimit){
+//   movement = "diagonalBackRight";
+// }
+
 
 
 
 // ==========. THEN WE OUTPUT THE MOVEMENT TO THE PINS. HERE IS EXAMPLE CODE    ===========
 
-if (movement == "forward"){
-  digitalWrite(testPin, HIGH);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "right"){
-  digitalWrite(11, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "left"){
-  digitalWrite(12, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "down"){
-  digitalWrite(13, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "cornerRight"){
-  digitalWrite(pinCornerRight, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "cornerLeft"){
-  digitalWrite(pinCornerLeft, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "cornerBottomLeft"){
-  digitalWrite(pinCornerBottomLeft, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
-else if(movement == "cornerBottomRight"){
-  digitalWrite(pinCornerBottomRight, HIGH);
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  delay(10);
-}
-else{
-  digitalWrite(testPin, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-  digitalWrite(13, LOW);
-  digitalWrite(pinCornerRight, LOW);
-  digitalWrite(pinCornerLeft, LOW);
-  digitalWrite(pinCornerBottomLeft, LOW);
-  digitalWrite(pinCornerBottomRight, LOW);
-  delay(10);
-}
+// if (movement == "forward"){
+//   digitalWrite(testPin, HIGH);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "right"){
+//   digitalWrite(11, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "left"){
+//   digitalWrite(12, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "down"){
+//   digitalWrite(13, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "cornerRight"){
+//   digitalWrite(pinCornerRight, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "cornerLeft"){
+//   digitalWrite(pinCornerLeft, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "cornerBottomLeft"){
+//   digitalWrite(pinCornerBottomLeft, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+// else if(movement == "cornerBottomRight"){
+//   digitalWrite(pinCornerBottomRight, HIGH);
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   delay(10);
+// }
+// else{
+//   digitalWrite(testPin, LOW);
+//   digitalWrite(11, LOW);
+//   digitalWrite(12, LOW);
+//   digitalWrite(13, LOW);
+//   digitalWrite(pinCornerRight, LOW);
+//   digitalWrite(pinCornerLeft, LOW);
+//   digitalWrite(pinCornerBottomLeft, LOW);
+//   digitalWrite(pinCornerBottomRight, LOW);
+//   delay(10);
+// }
+
+  // Set all thrusters to LOW first
+  digitalWrite(forward_thruster_starboard, LOW);
+  digitalWrite(forward_thruster_port, LOW);
+  digitalWrite(forward_thruster_mid, LOW);
+  digitalWrite(forward_thruster_vertical, LOW);
+  digitalWrite(reverse_thruster_starboard, LOW);
+  digitalWrite(reverse_thruster_port, LOW);
+  digitalWrite(reverse_thruster_mid, LOW);
+  digitalWrite(reverse_thruster_vertical, LOW);
+
+  // Activate thrusters for current movement
+  if (movement == "forward") {
+    activateThruster(FORWARD);
+  } else if (movement == "reverse") {
+    activateThruster(BACKWARD);
+  } else if (movement == "left") {
+    activateThruster(LEFT);
+  } else if (movement == "right") {
+    activateThruster(RIGHT);
+  } else if (movement == "cornerLeft") {
+    activateThruster(LEFT_UPPER);
+  } else if (movement == "cornerRight") {
+    activateThruster(RIGHT_UPPER);
+  } else if (movement == "cornerBottomLeft") {
+    activateThruster(LEFT_LOWER);
+  } else if (movement == "cornerBottomRight") {
+    activateThruster(RIGHT_LOWER);
+  }
+  // UP and DOWN are handled by separate button inputs, not joystick
 }
 
-
-
-
-if movement = forward{
-
-  thruster1_forward = on
-  thruster2_forward = on
-  thruster3_forward = on
-
-}
-if movement = left{
-
-  pin1 = forward_thruster_starboard
-  pin2 = forward_thruster_port
-  pin3 = forward_thruster_mid
-  pin4 = forward_thruster_vertical
-  pin5 = reverse_thruster_starboard
-  pin6 = reverse_thruster_port
-  pin7 = reverse_thruster_mid
-  pin8 = reverse_thruster_vertical
-
-
-}
-
-struct thruster{
-  forward = {forward_thruster_starboard, forward_thruster_port, forward_thruster_mid};
-  reverse = {pin5, pin6, pin7, pin8};
-  left_upper_corner = {forward_thruster_port, forward_thruster_mid, reverse_thruster_starboard};
-  right_upper_corner = {pin13, pin14, pin15, pin16};
-  left_lower_corner = {pin17, pin18, pin19, pin20};
-  right_lower_corner = {pin21, pin22, pin23, pin24};
+void activateThruster(Movement direction) {
+  ThrusterConfig config = thrusters[direction];
+  for (int i = 0; i < config.pinCount; i++) {
+    digitalWrite(config.pins[i], HIGH);
+  }
 }
