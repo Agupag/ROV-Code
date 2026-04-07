@@ -1,0 +1,19 @@
+{
+  "name": "payload",
+  "author": "Connor Madriago",
+  "pins": [
+    "VCC",
+    "GND",
+    "CE",
+    "CSN",
+    "SCK",
+    "MOSI",
+    "MISO",
+    "IRQ",
+    "THR1_LED",
+    "THR2_LED",
+    "THR3_LED",
+    "THR4_LED"
+  ],
+  "controls": []
+}
