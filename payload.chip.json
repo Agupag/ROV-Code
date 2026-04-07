@@ -10,10 +10,14 @@
     "MOSI",
     "MISO",
     "IRQ",
-    "THR1_LED",
-    "THR2_LED",
-    "THR3_LED",
-    "THR4_LED"
+    "M1_FWD",
+    "M1_REV",
+    "M2_FWD",
+    "M2_REV",
+    "M3_FWD",
+    "M3_REV",
+    "M4_FWD",
+    "M4_REV"
   ],
   "controls": []
 }

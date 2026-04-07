@@ -9,15 +9,7 @@
     "SCK",
     "MOSI",
     "MISO",
-    "IRQ",
-    "M1F",
-    "M1R",
-    "M2F",
-    "M2R",
-    "M3F",
-    "M3R",
-    "M4F",
-    "M4R"
+    "IRQ"
   ],
   "controls": []
 }
