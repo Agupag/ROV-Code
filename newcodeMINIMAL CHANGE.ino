@@ -1,18 +1,3 @@
-// ============================== ALTERED FROM ORIGINAL SHORECODE - BLOCK 1 START ===================== 
-/* 
- * Last Rev 4/7/2026:  Target: Arduino Nano
- * Minimal-change joystick version of Shore Control Programming for ROV V4.
- *
- * This sketch keeps the original shoreCode structure as much as possible.
- * Only the hardware-specific parts were changed so it matches the Nano
- * joystick controller used in this repo:
- * - nRF24L01+ on CE=8, CSN=2
- * - Joystick 1 on A2/A3 for thrust direction
- * - Joystick 2 on A6/A7 for servo control
- * - SD uses D10 as chip select so it does not conflict with the joystick pins
- *
- */
-// ============================== ALTERED FROM ORIGINAL SHORECODE - BLOCK 1 END ===================== 
 
 /****** Set Payload ID# *******/
 const uint8_t payloadNumber = 2;        // integer from 1 through 12
@@ -27,15 +12,13 @@ const String fname = "ROVDATA.CSV";     // SD card file name
 /********** ConstantS*************************/
 
 // ============================== ALTERED FROM ORIGINAL SHORECODE - BLOCK 2 START ===================== 
-// --- Thruster Mapping ---
-// Change these to m1, m2, m3, m4 to easily match the payload's wiring!
+// Change these to m1, m2, m3, m4
 #define T_VERT    m1
 #define T_REAR_L  m2
 #define T_REAR_R  m3
 #define T_FRONT   m4
 
 // --- Servo Limits ---
-// Change these to limit how far the main servo turns up and down
 #define SERVO1_MIN_ANGLE 0    // Down direction limit (0-90)
 #define SERVO1_MAX_ANGLE 180  // Up direction limit (90-180)
 // ============================== ALTERED FROM ORIGINAL SHORECODE - BLOCK 2 END ===================== 
